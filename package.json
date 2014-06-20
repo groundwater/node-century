@@ -1,0 +1,14 @@
+{
+  "name": "century",
+  "version": "0.0.0",
+  "description": "minimal pid 1 process",
+  "author": "Jacob Groundwater <groundwater@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^1.2.0",
+    "minimist": "^0.0.10"
+  },
+  "bin": {
+    "century": "century.js"
+  }
+}
