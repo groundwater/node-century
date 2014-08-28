@@ -6,8 +6,8 @@ var argv    = require('minimist')(process.argv.slice(2))
 var spawn   = require('child_process').spawn
 var binding = require('./build/Release/binding.node')
 
-var BOOT    = process.env.BOOT || false
-var ival    = argv.interval || argv.i || 3000;
+var interactive = argv.interactive || false
+var ival        = argv.interval || argv.i || 3000;
 
 if (argv._.length == 0) {
   console.log('Usage: init EXEC [ARGS...]')
@@ -15,21 +15,20 @@ if (argv._.length == 0) {
   process.exit(1)
 }
 
-if (BOOT) {
-  console.log('boot mode')
-} else {
-  console.log('interactive mode')
-}
 
 // setup wait interval
 
 setInterval(function(){
-  console.log('calling wait')
+  if (interactive) console.log('calling wait')
+
   var status = binding.wait()
-  console.log('status', status)
+
+  if (interactive) console.log('status', status)
 }, ival)
 
-console.log('wait interval: %sms', ival)
+
+if (interactive) console.log('wait interval: %sms', ival)
+
 
 // start first runner
 
@@ -47,21 +46,15 @@ var opts = {
 var proc = spawn(exec, args, opts)
 
 proc.on('exit', function(code, signal){
-  console.log('first runner exited')
+  if (interactive) console.log('first runner exited')
 
-  // exit code, or 1
-  var exit = code
-  if (signal) {
-    exit = 2 // do not exit 0 when first runner is terminated via signal
+  // do not exit 0 when first runner is terminated via signal
+  if (signal) code = 2
 
-    console.log('signal', signal)
-  } else {
-    console.log('code', code)
+  if (interactive) console.log('signal', signal ? signal : code)
+
+  // shutdown in interactive mode
+  if (interactive) {
+    process.exit(code)
   }
-
-  // shutdown in non-boot (interactive) mode
-  if (!BOOT) {
-    process.exit(exit)
-  }
-
 })
