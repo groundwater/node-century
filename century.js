@@ -40,9 +40,9 @@ log('wait interval: %sms', ival)
 var args = argv._
 var exec = args.shift()
 
-if(exec) {
+if(!exec) {
   console.log('No EXEC command found, starting REPL session')
-  require("repl").start()
+  require('repl').start('century> ')
 }
 else {
   var opts = {
