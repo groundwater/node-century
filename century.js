@@ -10,7 +10,7 @@ var interactive = argv.interactive
 var verbose     = argv.verbose || argv.v
 var ival        = argv.interval || argv.i || 3000;
 
-if (argv._.length == 0 && !interactive) {
+if (argv._.length == 0 && interactive) {
   console.log('Usage: init [ARGS...] EXEC')
 
   process.exit(1)
