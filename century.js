@@ -7,14 +7,32 @@ var spawn   = require('child_process').spawn
 var binding = require('./build/Release/binding.node')
 
 var interactive = argv.interactive
-var verbose     = argv.verbose || argv.v
+var verbose     = argv.verbose  || argv.v
 var ival        = argv.interval || argv.i || 3000;
 
-if (argv._.length == 0 && interactive) {
-  console.log('Usage: init [ARGS...] EXEC')
+var args = argv._
+var exec = args.shift()
 
-  process.exit(1)
+if(!exec)
+{
+  if(interactive)
+  {
+    console.log('Usage: init [ARGS...] EXEC')
+
+    process.exit(1)
+  }
+
+  console.log('No EXEC command found, starting REPL session')
+
+  require('repl').start('century> ').on('exit', function()
+  {
+    console.log('Got "exit" event from repl!');
+    process.exit(2);
+  });
+
+  return
 }
+
 
 function log(){
   if (verbose) console.log.apply(console, arguments)
@@ -31,41 +49,29 @@ setInterval(function(){
   log('status', status)
 }, ival)
 
-
 log('wait interval: %sms', ival)
 
 
 // start first runner
 
-var args = argv._
-var exec = args.shift()
-
-if(!exec) {
-  console.log('No EXEC command found, starting REPL session')
-  require('repl').start('century> ')
+var opts = {
+  // the child should be attached to the same terminal
+  // as the init process, in case the user wants an
+  // immediately interactive experience
+  stdio: 'inherit'
 }
-else {
-  var opts = {
-    // the child should be attached to the same terminal
-    // as the init process, in case the user wants an
-    // immediately interactive experience
 
-    stdio: 'inherit'
-  }
+var proc = spawn(exec, args, opts)
 
-  var proc = spawn(exec, args, opts)
+proc.on('exit', function(code, signal)
+{
+  log('first runner exited')
 
-  proc.on('exit', function(code, signal){
-    log('first runner exited')
+  // do not exit 0 when first runner is terminated via signal
+  if(signal) code = 3
 
-    // do not exit 0 when first runner is terminated via signal
-    if (signal) code = 2
+  log('signal', signal ? signal : code)
 
-    log('signal', signal ? signal : code)
-
-    // shutdown in interactive mode
-    if (interactive) {
-      process.exit(code)
-    }
-  })
-}
+  // shutdown in interactive mode
+  if(interactive) process.exit(code)
+})
