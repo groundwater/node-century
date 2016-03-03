@@ -1,3 +1,9 @@
+# Obsolete, using [nodeos-init](https://github.com/piranna/nodeos-init) instead
+
+This repo will remain for reference purposses
+
+----
+
 # Century
 
 > a minimal pid 1 process
